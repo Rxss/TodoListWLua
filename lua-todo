@@ -1,0 +1,75 @@
+local todo_file = "todo.txt"
+
+local function load_tasks()
+  local tasks = {}
+  local f = io.open(todo_file, "r")
+  if f then
+    for line in f:lines() do
+      table.insert(tasks, line)
+    end
+    f:close()
+  end
+  return tasks
+end
+
+local function save_tasks(tasks)
+  local f = io.open(todo_file, "w")
+  for _, task in ipairs(tasks) do
+    f:write(task .. "\n")
+  end
+  f:close()
+end
+
+local function list_tasks(tasks)
+  if #tasks == 0 then
+    print "No Tasks."
+    return
+  end
+  for i, task in ipairs(tasks) do
+    print(i .. ". " .. task)
+  end
+end
+
+local function add_task(tasks)
+  io.write "Enter new task: "
+  local task = io.read "*l"
+  table.insert(tasks, task)
+end
+
+local function remove_task(tasks)
+  list_tasks(tasks)
+  io.write "Enter task number to remove: "
+  local idx = tonumber(io.read "*l")
+  if idx and tasks[idx] then
+    table.remove(tasks, idx)
+  else
+    print "invalid task number."
+  end
+end
+
+local function clear_input()
+  io.read "*l"
+end
+
+local tasks = load_tasks()
+while true do
+  clear_input()
+  print "\n[1] List [2] Add [3] Remove [4] Save & Exit"
+  io.write "Choose an option: "
+  local choice = io.read "*l"
+
+  if choice == "1" then
+    list_tasks(tasks)
+  elseif choice == "2" then
+    add_task(tasks)
+  elseif choice == "3" then
+    remove_task(tasks)
+  elseif choice == "4" then
+    save_tasks(tasks)
+    print "Saved, Bye!"
+    break
+  else
+    print "Invalid option."
+    clear_input()
+  end
+end
