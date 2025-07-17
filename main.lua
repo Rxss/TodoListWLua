@@ -82,7 +82,8 @@ function love.draw()
     local inputY = startY + #tasks * 30 + 15
     love.graphics.setColor(0.8, 0.8, 0.8)
     love.graphics.rectangle("line", 20, inputY, 460, 30)
-
+    love.graphics.setColor(1, 1, 1)
+    love.graphics.print(input, 25, inputY + 5)
     love.graphics.setColor(0.5, 0.5, 0.5)
     love.graphics.print("Enter to add | Right-click to remove | Esc to quit", 20, inputY + 40)
   end
