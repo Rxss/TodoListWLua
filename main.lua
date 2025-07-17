@@ -6,6 +6,7 @@ local input = ""
 local points = 0
 local font, font_large
 local hover_index = nil
+local currentScreen = "main"
 
 local function loadTasks()
   local t = {}
@@ -52,36 +53,47 @@ function love.load()
 end
 
 function love.draw()
-  love.graphics.setBackgroundColor(0.12, 0.13, 0.15)
-  love.graphics.setColor(1, 1, 1)
-  love.graphics.setFont(font_large)
-  love.graphics.print("TODO LIST", 20, 15)
-  love.graphics.setFont(font)
-  love.graphics.print("Points: " .. points, 400, 20)
+  if currentScreen == "main" then
+    love.graphics.setBackgroundColor(0.12, 0.13, 0.15)
+    love.graphics.setColor(1, 1, 1)
+    love.graphics.setFont(font_large)
+    love.graphics.print("TODO LIST", 20, 15)
+    love.graphics.setFont(font)
+    love.graphics.print("Points: " .. points, 400, 20)
+    love.graphics.print("Store", 330, 20)
 
-  local startY = 60
-  for i, task in ipairs(tasks) do
-    local y = startY + (i - 1) * 30
-    if i == hover_index then
-      love.graphics.setColor(0.2, 0.3, 0.4, 0.5)
-      love.graphics.rectangle("fill", 15, y - 2, 500, 26)
+    local startY = 60
+    for i, task in ipairs(tasks) do
+      local y = startY + (i - 1) * 30
+      if i == hover_index then
+        love.graphics.setColor(0.2, 0.3, 0.4, 0.5)
+        love.graphics.rectangle("fill", 15, y - 2, 500, 26)
+      end
+
+      if task:sub(1, 4) == "[x] " then
+        love.graphics.setColor(0.3, 0.8, 0.3)
+      else
+        love.graphics.setColor(1, 1, 1)
+      end
+
+      love.graphics.print(task, 20, y)
     end
 
-    if task:sub(1, 4) == "[x] " then
-      love.graphics.setColor(0.3, 0.8, 0.3)
-    else
-      love.graphics.setColor(1, 1, 1)
-    end
+    local inputY = startY + #tasks * 30 + 15
+    love.graphics.setColor(0.8, 0.8, 0.8)
+    love.graphics.rectangle("line", 20, inputY, 460, 30)
 
-    love.graphics.print(task, 20, y)
+    love.graphics.setColor(0.5, 0.5, 0.5)
+    love.graphics.print("Enter to add | Right-click to remove | Esc to quit", 20, inputY + 40)
   end
-
-  local inputY = startY + #tasks * 30 + 15
-  love.graphics.setColor(0.8, 0.8, 0.8)
-  love.graphics.rectangle("line", 20, inputY, 460, 30)
-
-  love.graphics.setColor(0.5, 0.5, 0.5)
-  love.graphics.print("Enter to add | Right-click to remove | Esc to quit", 20, inputY + 40)
+  if currentScreen == "store" then
+    love.graphics.setBackgroundColor(0.12, 0.13, 0.15)
+    love.graphics.setColor(1, 1, 1)
+    love.graphics.setFont(font_large)
+    love.graphics.print("STORE", 20, 15)
+    love.graphics.setFont(font)
+    love.graphics.print("Points: " .. points, 400, 20)
+  end
 end
 
 function love.textinput(t)
@@ -120,6 +132,11 @@ function love.mousepressed(x, y, button)
         table.remove(tasks, i)
       end
       break
+    end
+    if button == 1 then
+      if x >= 330 and x <= 330 + 20 and y >= 20 and y <= 20 + 30 then
+        currentScreen = "store"
+      end
     end
   end
 end
