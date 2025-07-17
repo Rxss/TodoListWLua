@@ -7,9 +7,8 @@ local points = 0
 local font, font_large
 local hover_index = nil
 
-local function load_tasks()
+local function loadTasks()
   local t = {}
-  love.graphics.print("> " .. input, 25, input_y + 5)
   local f = io.open(todo_file, "r")
   if f then
     for line in f:lines() do
@@ -20,7 +19,7 @@ local function load_tasks()
   return t
 end
 
-local function save_tasks()
+local function saveTasks()
   local f = io.open(todo_file, "w")
   for _, task in ipairs(tasks) do
     f:write(task .. "\n")
@@ -48,7 +47,7 @@ function love.load()
   font = love.graphics.newFont(16)
   font_large = love.graphics.newFont(24)
   love.graphics.setFont(font)
-  tasks = load_tasks()
+  tasks = loadTasks()
   points = getPoints()
 end
 
@@ -77,12 +76,12 @@ function love.draw()
     love.graphics.print(task, 20, y)
   end
 
-  local input_y = startY + #tasks * 30 + 15
+  local inputY = startY + #tasks * 30 + 15
   love.graphics.setColor(0.8, 0.8, 0.8)
-  love.graphics.rectangle("line", 20, input_y, 460, 30)
+  love.graphics.rectangle("line", 20, inputY, 460, 30)
 
   love.graphics.setColor(0.5, 0.5, 0.5)
-  love.graphics.print("Enter to add | Right-click to remove | Esc to quit", 20, input_y + 40)
+  love.graphics.print("Enter to add | Right-click to remove | Esc to quit", 20, inputY + 40)
 end
 
 function love.textinput(t)
@@ -98,7 +97,7 @@ function love.keypressed(key)
       input = ""
     end
   elseif key == "escape" then
-    save_tasks()
+    saveTasks()
     savePoints()
     love.event.quit()
   end
@@ -126,18 +125,18 @@ function love.mousepressed(x, y, button)
 end
 
 function love.mousemoved(x, y)
-  hover_index = nil
+  hoverIndex = nil
   local startY = 60
   for i = 1, #tasks do
     local ty = startY + (i - 1) * 30
     if y >= ty and y <= ty + 24 then
-      hover_index = i
+      hoverIndex = i
       break
     end
   end
 end
 
 function love.quit()
-  save_tasks()
+  saveTasks()
   savePoints()
 end
