@@ -7,6 +7,7 @@ local points = 0
 local font, font_large
 local hover_index = nil
 local currentScreen = "main"
+local scrollY = 0
 
 local function loadTasks()
   local t = {}
@@ -151,6 +152,15 @@ function love.mousemoved(x, y)
       hoverIndex = i
       break
     end
+  end
+end
+
+function love.wheelmoved(dx, dy)
+  if dy == 1 then
+    scrollY = scrollY + 1
+  end
+  if dx == 1 then
+    scrollY = scrollY - 1
   end
 end
 
