@@ -54,6 +54,7 @@ function love.load()
 end
 
 function love.draw()
+  local startY = 60 + scrollY
   if currentScreen == "main" then
     love.graphics.setBackgroundColor(0.12, 0.13, 0.15)
     love.graphics.setColor(1, 1, 1)
@@ -63,9 +64,8 @@ function love.draw()
     love.graphics.print("Points: " .. points, 400, 20)
     love.graphics.print("Store", 330, 20)
 
-    local startY = 60
     for i, task in ipairs(tasks) do
-      local y = startY + (i - 1) * 30
+      local y = startY + scrollY + (i - 1) * 30
       if i == hover_index then
         love.graphics.setColor(0.2, 0.3, 0.4, 0.5)
         love.graphics.rectangle("fill", 15, y - 2, 500, 26)
@@ -119,9 +119,10 @@ end
 
 function love.mousepressed(x, y, button)
   local startY = 60
+  local adjustedY = y - scrollY
   for i, task in ipairs(tasks) do
     local ty = startY + (i - 1) * 30
-    if y >= ty and y <= ty + 24 then
+    if adjustedY >= ty and adjustedY <= ty + 24 then
       if button == 1 then
         if task:sub(1, 4) == "[ ] " then
           tasks[i] = "[x] " .. task:sub(5)
@@ -145,10 +146,11 @@ end
 
 function love.mousemoved(x, y)
   hoverIndex = nil
+  local adjustedY = y - scrollY
   local startY = 60
   for i = 1, #tasks do
     local ty = startY + (i - 1) * 30
-    if y >= ty and y <= ty + 24 then
+    if adjustedY >= ty and adjustedY <= ty + 24 then
       hoverIndex = i
       break
     end
@@ -156,12 +158,14 @@ function love.mousemoved(x, y)
 end
 
 function love.wheelmoved(dx, dy)
-  if dy == 1 then
-    scrollY = scrollY + 1
-  end
-  if dx == 1 then
-    scrollY = scrollY - 1
-  end
+  scrollY = scrollY - dy * 30
+  local minScroll = math.min(0, love.graphics.getHeight() - (#tasks * 30 + 60))
+  scrollY = math.max(minScroll, math.min(0, scrollY))
+end
+
+function love.quit()
+  saveTasks()
+  savePoints()
 end
 
 function love.quit()
