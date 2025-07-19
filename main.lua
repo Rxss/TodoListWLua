@@ -1,6 +1,8 @@
 local todo_file = "todo.txt"
 local points_file = "points.txt"
 
+local boxX, boxY = 20, 60
+local boxWidth, boxHeight = 400, 300
 local tasks = {}
 local input = ""
 local points = 0
@@ -64,11 +66,17 @@ function love.draw()
     love.graphics.print("Points: " .. points, 400, 20)
     love.graphics.print("Store", 330, 20)
 
+    love.graphics.setColor(0.4, 0.4, 0.4)
+    love.graphics.rectangle("line", boxX, boxY, boxWidth, boxHeight)
+
+    love.graphics.setScissor(boxX, boxY, boxWidth, boxHeight)
+    local startY = boxY + scrollY
     for i, task in ipairs(tasks) do
-      local y = startY + scrollY + (i - 1) * 30
+      local y = startY + (i - 1) * 30
+
       if i == hover_index then
         love.graphics.setColor(0.2, 0.3, 0.4, 0.5)
-        love.graphics.rectangle("fill", 15, y - 2, 500, 26)
+        love.graphics.rectangle("fill", boxX + 5, y - 2, boxWidth - 10, 26)
       end
 
       if task:sub(1, 4) == "[x] " then
@@ -77,10 +85,12 @@ function love.draw()
         love.graphics.setColor(1, 1, 1)
       end
 
-      love.graphics.print(task, 20, y)
+      love.graphics.print(task, boxX + 10, y)
     end
 
-    local inputY = startY + #tasks * 30 + 15
+    love.graphics.setScissor()
+
+    local inputY = boxY + boxHeight + 15
     love.graphics.setColor(0.8, 0.8, 0.8)
     love.graphics.rectangle("line", 20, inputY, 460, 30)
     love.graphics.setColor(1, 1, 1)
@@ -118,54 +128,57 @@ function love.keypressed(key)
 end
 
 function love.mousepressed(x, y, button)
-  local startY = 60
-  local adjustedY = y - scrollY
-  for i, task in ipairs(tasks) do
-    local ty = startY + (i - 1) * 30
-    if adjustedY >= ty and adjustedY <= ty + 24 then
-      if button == 1 then
-        if task:sub(1, 4) == "[ ] " then
-          tasks[i] = "[x] " .. task:sub(5)
-          points = points + 10
-        elseif task:sub(1, 4) == "[x] " then
-          tasks[i] = "[ ] " .. task:sub(5)
-          points = math.max(0, points - 10)
+  if currentScreen == "main" then
+    if x >= boxX and x <= boxX + boxWidth and y >= boxY and y <= boxY + boxHeight then
+      local adjustedY = y - scrollY
+      for i, task in ipairs(tasks) do
+        local ty = boxY + (i - 1) * 30
+        if adjustedY >= ty and adjustedY <= ty + 24 then
+          if button == 1 then
+            if task:sub(1, 4) == "[ ] " then
+              tasks[i] = "[x] " .. task:sub(5)
+              points = points + 10
+            elseif task:sub(1, 4) == "[x] " then
+              tasks[i] = "[ ] " .. task:sub(5)
+              points = math.max(0, points - 10)
+            end
+          elseif button == 2 then
+            table.remove(tasks, i)
+          end
+          break
         end
-      elseif button == 2 then
-        table.remove(tasks, i)
       end
-      break
     end
-    if button == 1 then
-      if x >= 330 and x <= 330 + 20 and y >= 20 and y <= 20 + 30 then
-        currentScreen = "store"
-      end
+
+    if x >= 330 and x <= 350 and y >= 20 and y <= 20 + 30 then
+      currentScreen = "store"
     end
   end
 end
 
 function love.mousemoved(x, y)
   hoverIndex = nil
-  local adjustedY = y - scrollY
-  local startY = 60
-  for i = 1, #tasks do
-    local ty = startY + (i - 1) * 30
-    if adjustedY >= ty and adjustedY <= ty + 24 then
-      hoverIndex = i
-      break
+  if x >= boxX and x <= boxX + boxWidth and y >= boxY and y <= boxY + boxHeight then
+    local adjustedY = y - scrollY
+
+    for i = 1, #tasks do
+      local ty = boxY + (i - 1) * 30
+      if adjustedY >= ty and adjustedY <= ty + 24 then
+        hoverIndex = i
+        break
+      end
     end
   end
 end
 
 function love.wheelmoved(dx, dy)
-  scrollY = scrollY - dy * 30
-  local minScroll = math.min(0, love.graphics.getHeight() - (#tasks * 30 + 60))
-  scrollY = math.max(minScroll, math.min(0, scrollY))
-end
-
-function love.quit()
-  saveTasks()
-  savePoints()
+  local mx, my = love.mouse.getPosition()
+  if mx >= boxX and mx <= boxX + boxWidth and my >= boxY and my <= boxY + boxHeight then
+    scrollY = scrollY - dy * 30
+    local contentHeight = #tasks * 30
+    local minScroll = math.min(0, boxHeight - contentHeight)
+    scrollY = math.max(minScroll, math.min(0, scrollY))
+  end
 end
 
 function love.quit()
