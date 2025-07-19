@@ -105,6 +105,7 @@ function love.draw()
     love.graphics.print("STORE", 20, 15)
     love.graphics.setFont(font)
     love.graphics.print("Points: " .. points, 400, 20)
+    love.graphics.print("Spend your points here!", 20, 50)
   end
 end
 
@@ -117,7 +118,8 @@ function love.keypressed(key)
     input = input:sub(1, -2)
   elseif key == "return" then
     if #input > 0 then
-      table.insert(tasks, "[ ] " .. input)
+      local date = os.date "%Y-%m-%d"
+      table.insert(tasks, "[ ] " .. input .. " (" .. date .. ")")
       input = ""
     end
   elseif key == "escape" then
